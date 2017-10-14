@@ -347,6 +347,16 @@ var USER_PREFERENCE_AUTOCOMPLETE_SELECTORS = 'autocomplete-css-selectors';
                     thisOb.setTextValue(cm.getValue());
                     thisOb.triggerEvent('delayedtextchange');
                 }, delay);
+
+                document.getElementById('magicss-value-textarea').value = cm.getValue();
+            });
+
+            cm.on('keyup', function (cm, evt) {
+                thisOb.triggerEvent('keyup', evt);
+            });
+
+            cm.on('keypress', function (cm, evt) {
+                thisOb.triggerEvent('keypress', evt);
             });
 
             // http://stackoverflow.com/questions/4179708/how-to-detect-if-the-pressed-key-will-produce-a-character-inside-an-input-text/4180715#4180715
@@ -751,9 +761,8 @@ var USER_PREFERENCE_AUTOCOMPLETE_SELECTORS = 'autocomplete-css-selectors';
                     break;
                 case 'keyup':
                     if (events.keyup) {
-                        events.keyup(thisOb);
+                        events.keyup(thisOb, config);
                     }
-                    thisOb.triggerEvent('testfortextchange');
                     break;
                 case 'delayedkeyup':
                     if (events.delayedkeyup) {
@@ -761,6 +770,11 @@ var USER_PREFERENCE_AUTOCOMPLETE_SELECTORS = 'autocomplete-css-selectors';
                     }
                     thisOb.triggerEvent('delayedtestfortextchange');
                     thisOb.triggerEvent('_delayedcursorprobablymoved');
+                    break;
+                case 'keypress':
+                    if (events.keypress) {
+                        events.keypress(thisOb, config);
+                    }
                     break;
                 default:
                     console.warn('An unexpected event was attempted to be triggered: ' + eventName);
