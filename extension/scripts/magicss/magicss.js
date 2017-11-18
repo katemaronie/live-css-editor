@@ -1074,11 +1074,16 @@ var USER_PREFERENCE_AUTOCOMPLETE_SELECTORS = 'autocomplete-css-selectors';
                     });
                 };
 
-                var getDataForFileToEdit = function (editor, cb) {
+                var getDataForFileToEdit = function (editor, options, cb) {
+                    options = options || {};
                     var needInputThroughUi = true;
-                    console.log('TODO: Set needInputThroughUi to true/false');
 
-                    if (needInputThroughUi) {
+                    var pathOfFileToEdit = editor.userPreference('file-to-edit');
+                    if (pathOfFileToEdit) {
+                        needInputThroughUi = false;
+                    }
+
+                    if (needInputThroughUi || options.showUi) {
                         showFileEditOptions(editor, function (filePath) {
                             // var fileSuggestions = window.fileSuggestions;
                             // var filePath = fileSuggestions.getValue()[0];
@@ -1110,7 +1115,15 @@ var USER_PREFERENCE_AUTOCOMPLETE_SELECTORS = 'autocomplete-css-selectors';
                             /* */
                         });
                     } else {
-                        console.log('TODO');
+                        loadFile(
+                            editor,
+                            {
+                                filePath: pathOfFileToEdit
+                            },
+                            function (file) {
+                                cb(file);
+                            }
+                        );
                     }
                 };
 
@@ -1125,7 +1138,7 @@ var USER_PREFERENCE_AUTOCOMPLETE_SELECTORS = 'autocomplete-css-selectors';
 
                 var setLanguageMode = function (languageMode, editor) {
                     if (languageMode === 'file') {
-                        getDataForFileToEdit(editor, function (file) {
+                        getDataForFileToEdit(editor, {}, function (file) {
                             editor.options.rememberText = false;
 
                             setLanguageModeClass(editor, 'magicss-selected-mode-file');
@@ -1776,8 +1789,19 @@ var USER_PREFERENCE_AUTOCOMPLETE_SELECTORS = 'autocomplete-css-selectors';
                         // });
                         /* */
 
-                        $footerItems.on('mousedown', function (evt) {
-                            evt.stopPropagation();
+                        // $footerItems.on('mousedown', function (evt) {
+                        //     evt.stopPropagation();
+                        // });
+
+                        $footerForFileMode.on('click', function () {
+                            getDataForFileToEdit(editor, {showUi: true} ,function (file) {
+                                $('.footer-for-file-mode .name-of-file-being-edited').html(htmlEscape(getFileNameFromPath(file.path)));
+                                utils.alertNote('Now editing file: ' + htmlEscape(file.path), 5000);
+                                editor
+                                    .setTextValue(file.contents)
+                                    .reInitTextComponent({pleaseIgnoreCursorActivity: true})
+                                    .focus();
+                            });
                         });
 
                         // Magic Suggest uses old jQuery code. Minor changes to fix that
